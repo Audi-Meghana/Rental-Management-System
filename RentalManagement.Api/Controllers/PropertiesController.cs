@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Security.Claims;
 using RentalManagement.Api.Data;
 using RentalManagement.Api.DTOs;
 using RentalManagement.Api.Services;
@@ -33,7 +34,8 @@ public class PropertiesController : ControllerBase
         decimal? minRent,
         decimal? maxRent,
         int? bedrooms,
-        bool? isAvailable)
+        bool? isAvailable,
+        string? propertyType)
     {
         var properties = await _propertyService.GetAllAsync(
             location,
@@ -41,7 +43,8 @@ public class PropertiesController : ControllerBase
             minRent,
             maxRent,
             bedrooms,
-            isAvailable);
+            isAvailable,
+            propertyType);
 
         return Ok(properties);
     }
@@ -54,6 +57,14 @@ public class PropertiesController : ControllerBase
             .FirstOrDefaultAsync(item => item.Id == id);
 
         if (property == null)
+        {
+            return NotFound("Property not found.");
+        }
+
+        if (!property.IsPublished &&
+            !User.IsInRole("Admin") &&
+            !(int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var viewerId) &&
+              property.OwnerId == viewerId))
         {
             return NotFound("Property not found.");
         }
@@ -72,8 +83,45 @@ public class PropertiesController : ControllerBase
             property.Description,
             property.Bedrooms,
             property.IsAvailable,
+            property.IsPublished,
             property.ImageUrl,
             property.ImageUrls,
+            property.PropertyType,
+            property.Bathrooms,
+            property.Balconies,
+            property.BuiltUpArea,
+            property.FloorNumber,
+            property.TotalFloors,
+            property.Furnishing,
+            property.PropertyAge,
+            property.Facing,
+            property.Parking,
+            property.WaterSupply,
+            property.Address,
+            property.Area,
+            property.City,
+            property.State,
+            property.Latitude,
+            property.Longitude,
+            property.NearbyLandmarks,
+            property.SecurityDeposit,
+            property.MaintenanceCharges,
+            property.BrokerageCharges,
+            property.AdvancePayment,
+            property.ElectricityCharges,
+            property.WaterCharges,
+            property.IsRentNegotiable,
+            property.Amenities,
+            property.PreferredTenants,
+            property.GenderPreference,
+            property.PetsAllowed,
+            property.SmokingAllowed,
+            property.DrinkingAllowed,
+            property.VisitorsAllowed,
+            property.MinimumStayMonths,
+            property.LeaseDurationMonths,
+            property.NoticePeriodMonths,
+            property.AvailableFrom,
             Owner = owner == null ? null : new
             {
                 owner.Id,

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import TopBar from "../components/TopBar";
-import Navbar from "../components/Navbar";
+import SiteHeader from "../components/SiteHeader";
 import Footer from "../components/Footer";
 import { getProperties, getImageUrl } from "../services/propertyService";
 
@@ -23,8 +22,7 @@ function About() {
 
   return (
     <>
-      <TopBar />
-      <Navbar />
+      <SiteHeader />
       <main className="about-page">
         <section className="about-hero">
           <div className="container about-hero-inner">

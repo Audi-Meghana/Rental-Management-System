@@ -1,0 +1,74 @@
+.admin-reports-page {
+  min-height: 100vh;
+  background: #f7f8f4;
+  color: #28242a;
+}
+
+.admin-reports-header {
+  display: flex;
+  min-height: 86px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 14px max(5vw, calc((100vw - 1300px) / 2));
+  background: #2d1937;
+  color: #fff;
+}
+
+.admin-reports-header > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-reports-header > div strong { font-size: 12px; }
+.admin-reports-content { max-width: 1300px; margin: auto; padding: 45px 5vw 70px; }
+.admin-report-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: -4px 0 18px; }
+.admin-report-filters button { display: inline-flex; min-height: 36px; gap: 9px; align-items: center; padding: 0 12px; border: 1px solid #dfe6dc; background: #fff; color: #596359; font: inherit; font-size: 10px; cursor: pointer; }
+.admin-report-filters button.active { border-color: #168b5a; background: #eff7e8; color: #168b5a; font-weight: 800; }
+.admin-report-filters button span { display: grid; min-width: 19px; height: 19px; place-items: center; border-radius: 50%; background: #edf0eb; color: #606b60; font-size: 9px; }
+.admin-report-filters button.active span { background: #168b5a; color: #fff; }
+.admin-report-list, .tenancy-list { display: flex; flex-direction: column; gap: 14px; }
+.admin-report-card, .tenancy-card { padding: 22px; background: #fff; border: 1px solid #e8ede5; }
+.admin-report-card button:disabled { cursor: wait; opacity: .6; }
+.admin-report-updating { margin: 10px 0 0; color: #168b5a; font-size: 10px; font-weight: 700; }
+.admin-report-card > header { display: flex; align-items: start; justify-content: space-between; gap: 18px; }
+.admin-report-card h2, .tenancy-card h2 { margin: 6px 0; color: #2d1937; font-size: 19px; }
+.admin-report-card h2 a { color: inherit; text-decoration: none; }
+.admin-report-status { padding: 6px 9px; background: #fff3e5; color: #9a5a17; font-size: 10px; font-style: normal; }
+.admin-report-status.status-dismissed, .admin-report-status.status-reviewed { background: #eff7e8; color: #168b5a; }
+.admin-report-status.status-listinghidden { background: #fff1f1; color: #b94242; }
+.admin-report-description, .admin-report-meta, .admin-report-note { color: #697269; font-size: 12px; line-height: 1.65; }
+.admin-report-meta { display: flex; flex-wrap: wrap; gap: 8px 20px; padding: 11px 0; border-top: 1px solid #edf0eb; }
+.admin-report-note-field, .tenancy-upload-form label, .tenancy-proposal-form label { display: flex; flex-direction: column; gap: 7px; color: #586258; font-size: 11px; font-weight: 700; }
+.admin-report-note-field textarea, .tenancy-upload-form input, .tenancy-proposal-form input { width: 100%; padding: 10px; border: 1px solid #dfe6dc; background: #fff; color: #404840; font: inherit; font-size: 12px; }
+.admin-report-note-field textarea { margin-top: 5px; resize: vertical; }
+.admin-report-card .owner-enquiry-actions { margin-top: 14px; }
+.admin-hide-listing { background: #a53d3d; }
+.admin-hide-listing:hover { background: #8e3030; }
+.tenancy-card { display: flex; flex-direction: column; gap: 15px; }
+.tenancy-card .owner-enquiry-heading { align-items: center; }
+.tenancy-card .owner-enquiry-heading em { padding: 6px 9px; background: #eff7e8; color: #168b5a; font-size: 10px; font-style: normal; }
+.tenancy-details { display: flex; flex-wrap: wrap; gap: 16px 35px; padding: 13px 0; border-top: 1px solid #edf0eb; border-bottom: 1px solid #edf0eb; }
+.tenancy-details span { display: flex; flex-direction: column; gap: 5px; color: #586258; font-size: 12px; }
+.tenancy-details strong { color: #929991; font-size: 9px; text-transform: uppercase; }
+.tenancy-upload-form, .tenancy-proposal-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; align-items: end; }
+.tenancy-upload-form label { grid-column: 1 / -1; }
+.tenancy-proposal-form { grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 14px; background: #f7f8f4; }
+.verified-renter-badge { display: inline-flex; gap: 5px; align-items: center; margin-left: 9px; padding: 4px 6px; border-radius: 2px; background: #eff7e8; color: #168b5a !important; font-size: 9px !important; font-weight: 700; letter-spacing: 0 !important; vertical-align: middle; }
+.verified-renter-badge i { font-size: 10px; }
+.detail-review-requirement { padding: 14px; background: #f7f8f4; color: #697269; font-size: 11px; line-height: 1.6; }
+
+@media (max-width: 760px) {
+  .admin-reports-header { flex-wrap: wrap; }
+  .admin-reports-header > div { order: 3; width: 100%; }
+  .admin-reports-content { padding: 28px 18px 50px; }
+  .admin-report-card { padding: 16px; }
+  .tenancy-proposal-form { grid-template-columns: 1fr 1fr; }
+  .tenancy-upload-form { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 440px) {
+  .tenancy-proposal-form { grid-template-columns: 1fr; }
+  .admin-report-card .owner-enquiry-actions > * { flex-basis: 100%; }
+}

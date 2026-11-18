@@ -2,6 +2,18 @@ import { Link } from "react-router-dom";
 import { getImageUrl } from "../services/propertyService";
 
 function OwnerPropertyCard({ property, onDelete }) {
+  const rentalPreferences = [
+    property.preferredTenants?.trim(),
+    property.genderPreference?.trim() ? `Gender: ${property.genderPreference.trim()}` : "",
+    property.petsAllowed == null ? "" : `Pets ${property.petsAllowed ? "allowed" : "not allowed"}`,
+    property.smokingAllowed == null ? "" : `Smoking ${property.smokingAllowed ? "allowed" : "not allowed"}`,
+    property.drinkingAllowed == null ? "" : `Drinking ${property.drinkingAllowed ? "allowed" : "not allowed"}`,
+    property.visitorsAllowed == null ? "" : `Visitors ${property.visitorsAllowed ? "allowed" : "restricted"}`,
+    property.minimumStayMonths == null ? "" : `Min. stay ${property.minimumStayMonths} mo.`,
+    property.leaseDurationMonths == null ? "" : `Lease ${property.leaseDurationMonths} mo.`,
+    property.noticePeriodMonths == null ? "" : `Notice ${property.noticePeriodMonths} mo.`
+  ].filter(Boolean);
+
   return (
     <article className="owner-property-card">
       <div className="owner-property-image">
@@ -22,6 +34,12 @@ function OwnerPropertyCard({ property, onDelete }) {
         <div className="owner-property-meta">
           <span><i className="bi bi-door-open"></i>{property.bedrooms} bedrooms</span>
           <span><i className="bi bi-check2-circle"></i>{property.isAvailable ? "Ready to rent" : "Currently rented"}</span>
+        </div>
+        <div className="owner-property-preferences">
+          <strong>Rental preferences</strong>
+          <p>{rentalPreferences.length
+            ? `${rentalPreferences.slice(0, 3).join(" · ")}${rentalPreferences.length > 3 ? ` · +${rentalPreferences.length - 3} more` : ""}`
+            : "Not added yet — edit this listing to add house rules."}</p>
         </div>
         <div className="owner-property-actions">
           <Link to={`/listings/${property.id}`} className="owner-text-button">View details <i className="bi bi-arrow-up-right"></i></Link>

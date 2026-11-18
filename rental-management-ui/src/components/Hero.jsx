@@ -5,42 +5,46 @@ function Hero({ onSearch }) {
   const [bedrooms, setBedrooms] = useState("");
   const [propertyType, setPropertyType] = useState("");
 
+  const search = (event) => {
+    event.preventDefault();
+    onSearch({ location: location.trim(), bedrooms, propertyType });
+  };
+
   return (
-    <section className="hero-section">
+    <section className="hero-section reference-hero">
       <div className="hero-overlay"></div>
-      <div className="container h-100 position-relative">
-        <div className="hero-property-box">
-          <h2>Homes that feel like<br />your own.</h2>
-          <span className="hero-price">Live beautifully, wherever you are.</span>
+      <div className="container reference-hero-inner">
+        <div className="reference-hero-copy">
+          <h1>Homes that feel like<br />your own.</h1>
+          <p>Live beautifully, wherever you are.</p>
         </div>
-        <h1 className="find-home">Find your home</h1>
-        <div className="hero-search">
-          <div className="search-field">
-            <select value={propertyType} onChange={(event) => setPropertyType(event.target.value)}>
-              <option value="">Property type</option>
-              <option value="House">House</option>
+        <form className="hero-search reference-hero-search" onSubmit={search}>
+          <div className="reference-search-field">
+            <label htmlFor="home-property-type">Property type</label>
+            <div><i className="bi bi-building"></i><select id="home-property-type" value={propertyType} onChange={(event) => setPropertyType(event.target.value)}>
+              <option value="">Any property type</option>
               <option value="Apartment">Apartment</option>
-              <option value="Room">Room</option>
-            </select>
-            <i className="bi bi-chevron-down"></i>
+              <option value="Independent house">Independent house</option>
+              <option value="Villa">Villa</option>
+              <option value="PG">PG</option>
+              <option value="Studio">Studio</option>
+              <option value="Other">Other</option>
+            </select><i className="bi bi-chevron-down reference-select-chevron"></i></div>
           </div>
-          <div className="search-field">
-            <select value={bedrooms} onChange={(event) => setBedrooms(event.target.value)}>
+          <div className="reference-search-field">
+            <label htmlFor="home-bedrooms">Bedrooms</label>
+            <div><i className="bi bi-door-open"></i><select id="home-bedrooms" value={bedrooms} onChange={(event) => setBedrooms(event.target.value)}>
               <option value="">Any bedrooms</option>
-              <option value="1">1 bedroom</option>
-              <option value="2">2 bedrooms</option>
-              <option value="3">3 bedrooms</option>
-              <option value="4">4 bedrooms</option>
-            </select>
-            <i className="bi bi-chevron-down"></i>
+              {[1, 2, 3, 4, 5].map((count) => <option value={count} key={count}>{count} bedroom{count === 1 ? "" : "s"}</option>)}
+            </select><i className="bi bi-chevron-down reference-select-chevron"></i></div>
           </div>
-          <div className="search-field">
-            <input type="text" placeholder="Location" value={location} onChange={(event) => setLocation(event.target.value)} />
+          <div className="reference-search-field">
+            <label htmlFor="home-location">Location</label>
+            <div><i className="bi bi-geo-alt"></i><input id="home-location" type="search" placeholder="Enter city or locality" value={location} onChange={(event) => setLocation(event.target.value)} /></div>
           </div>
-          <button type="button" className="search-btn" onClick={() => onSearch({ location, bedrooms, propertyType })}>SEARCH HOMES</button>
-        </div>
+          <button type="submit" className="search-btn"><i className="bi bi-search"></i>Search homes</button>
+        </form>
       </div>
-      <button type="button" className="hero-next" aria-label="Next"><i className="bi bi-chevron-right"></i></button>
     </section>
   );
 }

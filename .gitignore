@@ -21,6 +21,9 @@
 # Logs
 *.log
 
+# Private support ticket attachments
+RentalManagement.Api/App_Data/support-attachments/
+
 # OS files
 .DS_Store
 Thumbs.db

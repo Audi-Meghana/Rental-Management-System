@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import Login from "../pages/auth/Login";
@@ -14,6 +14,7 @@ function Navbar() {
   const [showRegister, setShowRegister] = useState(false);
   const [showUserSignup, setShowUserSignup] = useState(false);
   const [showOwnerSignup, setShowOwnerSignup] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [loginEmail, setLoginEmail] = useState("");
   const [user, setUser] = useState(() => getUser());
@@ -97,6 +98,7 @@ function Navbar() {
 
   const firstName = user?.fullName?.split(" ")[0] || "Account";
   const isOwner = user?.role === "Owner";
+  const isAdmin = user?.role === "Admin";
 
   return (
     <>
@@ -111,41 +113,46 @@ function Navbar() {
             </Link>
 
             {/* NAV LINKS */}
-            <div className="nav-links">
-              <Link
+            <div
+              id="site-navigation"
+              className={`nav-links${isMobileMenuOpen ? " is-open" : ""}`}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <NavLink
                 to="/"
-                className="nav-item-link active"
+                end
+                className={({ isActive }) => `nav-item-link${isActive ? " active" : ""}`}
               >
                 Home
-              </Link>
+              </NavLink>
 
-              <Link
+              <NavLink
                 to="/about"
-                className="nav-item-link"
+                className={({ isActive }) => `nav-item-link${isActive ? " active" : ""}`}
               >
                 About Us
-              </Link>
+              </NavLink>
 
-              <Link
+              <NavLink
                 to="/listings"
-                className="nav-item-link"
+                className={({ isActive }) => `nav-item-link${isActive ? " active" : ""}`}
               >
                 Listings
-              </Link>
+              </NavLink>
 
-              <Link
+              <NavLink
                 to="/news"
-                className="nav-item-link"
+                className={({ isActive }) => `nav-item-link${isActive ? " active" : ""}`}
               >
                 News
-              </Link>
+              </NavLink>
 
-              <Link
+              <NavLink
                 to="/contact"
-                className="nav-item-link"
+                className={({ isActive }) => `nav-item-link${isActive ? " active" : ""}`}
               >
                 Contact
-              </Link>
+              </NavLink>
             </div>
 
             {/* ACTION BUTTONS */}
@@ -174,16 +181,16 @@ function Navbar() {
                       <span>{user.email}</span>
                     </div>
 
-                    <Link to={isOwner ? "/owner/dashboard" : "/user/dashboard"}>
+                    <Link to={isAdmin ? "/admin" : isOwner ? "/owner/dashboard" : "/user/dashboard"}>
                       <i className="bi bi-grid-1x2"></i>
                       Dashboard
                     </Link>
 
-                    <Link to={isOwner ? "/owner/chats" : "/user/chats"}>
+                    {!isAdmin && <Link to={isOwner ? "/owner/chats" : "/user/chats"}>
                       <i className="bi bi-chat-dots"></i>
                       Chats
                       {isOwner && <small>Owner chats</small>}
-                    </Link>
+                    </Link>}
 
                     <button
                       type="button"
@@ -216,6 +223,17 @@ function Navbar() {
               )}
 
             </div>
+
+            <button
+              type="button"
+              className="mobile-nav-toggle"
+              aria-label={isMobileMenuOpen ? "Close navigation" : "Open navigation"}
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="site-navigation"
+              onClick={() => setIsMobileMenuOpen((isOpen) => !isOpen)}
+            >
+              <i className={`bi ${isMobileMenuOpen ? "bi-x-lg" : "bi-list"}`} aria-hidden="true"></i>
+            </button>
 
           </div>
         </div>

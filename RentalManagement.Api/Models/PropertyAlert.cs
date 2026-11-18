@@ -1,0 +1,10 @@
+namespace RentalManagement.Api.Models;
+
+public class PropertyAlert
+{
+    public int Id { get; set; }
+    public int UserId { get; set; }
+    public int PropertyId { get; set; }
+    public bool IsActive { get; set; } = true;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+}

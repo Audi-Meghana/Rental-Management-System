@@ -11,7 +11,8 @@ public interface IPropertyService
         decimal? minRent,
         decimal? maxRent,
         int? bedrooms,
-        bool? isAvailable);
+        bool? isAvailable,
+        string? propertyType);
 
     Task<Property?> GetByIdAsync(int id);
 

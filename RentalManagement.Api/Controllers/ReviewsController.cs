@@ -30,9 +30,19 @@ public class ReviewsController : ControllerBase
             {
                 review.Id,
                 review.Rating,
+                review.CleanlinessRating,
+                review.LocationRating,
+                review.MaintenanceRating,
+                review.OwnerCommunicationRating,
                 review.Comment,
                 review.CreatedAt,
-                Reviewer = user.FullName
+                Reviewer = user.FullName,
+                IsVerifiedRenter = _context.RentalTenancies.Any(tenancy =>
+                    tenancy.PropertyId == review.PropertyId &&
+                    tenancy.RenterId == review.UserId &&
+                    tenancy.Status == "Confirmed" &&
+                    tenancy.OwnerConfirmed &&
+                    tenancy.RenterConfirmed)
             }
         ).ToListAsync();
 
@@ -45,17 +55,27 @@ public class ReviewsController : ControllerBase
     {
         var userId = GetUserId();
 
-        if (request.Rating is < 1 or > 5 || string.IsNullOrWhiteSpace(request.Comment))
+        if (request.Rating is < 1 or > 5 ||
+            request.CleanlinessRating is < 1 or > 5 ||
+            request.LocationRating is < 1 or > 5 ||
+            request.MaintenanceRating is < 1 or > 5 ||
+            request.OwnerCommunicationRating is < 1 or > 5 ||
+            string.IsNullOrWhiteSpace(request.Comment))
         {
-            return BadRequest(new { message = "Please provide a rating from 1 to 5 and a comment." });
+            return BadRequest(new { message = "Provide a rating from 1 to 5 for every category and a comment." });
         }
 
-        var hasInterest = await _context.PropertyInterests
-            .AnyAsync(interest => interest.UserId == userId && interest.PropertyId == propertyId);
+        var hasConfirmedTenancy = await _context.RentalTenancies
+            .AnyAsync(tenancy =>
+                tenancy.RenterId == userId &&
+                tenancy.PropertyId == propertyId &&
+                tenancy.Status == "Confirmed" &&
+                tenancy.OwnerConfirmed &&
+                tenancy.RenterConfirmed);
 
-        if (!hasInterest)
+        if (!hasConfirmedTenancy)
         {
-            return BadRequest(new { message = "Only users who showed interest can review this property." });
+            return BadRequest(new { message = "Only renters with a mutually confirmed tenancy can review this property." });
         }
 
         var existingReview = await _context.PropertyReviews
@@ -64,6 +84,10 @@ public class ReviewsController : ControllerBase
         if (existingReview != null)
         {
             existingReview.Rating = request.Rating;
+            existingReview.CleanlinessRating = request.CleanlinessRating;
+            existingReview.LocationRating = request.LocationRating;
+            existingReview.MaintenanceRating = request.MaintenanceRating;
+            existingReview.OwnerCommunicationRating = request.OwnerCommunicationRating;
             existingReview.Comment = request.Comment.Trim();
             existingReview.CreatedAt = DateTime.UtcNow;
         }
@@ -74,6 +98,10 @@ public class ReviewsController : ControllerBase
                 UserId = userId,
                 PropertyId = propertyId,
                 Rating = request.Rating,
+                CleanlinessRating = request.CleanlinessRating,
+                LocationRating = request.LocationRating,
+                MaintenanceRating = request.MaintenanceRating,
+                OwnerCommunicationRating = request.OwnerCommunicationRating,
                 Comment = request.Comment.Trim()
             });
         }
@@ -88,7 +116,7 @@ public class ReviewsController : ControllerBase
         var recommendations = await (
             from property in _context.Properties
             join review in _context.PropertyReviews on property.Id equals review.PropertyId
-            where property.IsAvailable
+            where property.IsAvailable && property.IsPublished
             group review by new
             {
                 property.Id,
@@ -127,6 +155,10 @@ public class ReviewsController : ControllerBase
     public class ReviewRequest
     {
         public int Rating { get; set; }
+        public int CleanlinessRating { get; set; }
+        public int LocationRating { get; set; }
+        public int MaintenanceRating { get; set; }
+        public int OwnerCommunicationRating { get; set; }
         public string Comment { get; set; } = string.Empty;
     }
 }

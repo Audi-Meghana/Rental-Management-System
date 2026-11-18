@@ -36,12 +36,14 @@ function Login({
         password
       );
 
-      onClose();
+      onClose?.();
 
       if (onAuthenticated) {
         onAuthenticated(data.user);
       } else {
-        if (data.user.role === "Owner") {
+        if (data.user.role === "Admin") {
+          window.location.href = "/admin";
+        } else if (data.user.role === "Owner") {
           window.location.href = "/owner/dashboard";
         } else {
           window.location.href = "/user/dashboard";

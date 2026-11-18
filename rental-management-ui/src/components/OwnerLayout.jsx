@@ -24,7 +24,7 @@ function OwnerLayout() {
           <span className="owner-panel-label">OWNER PANEL</span>
         </div>
 
-        <nav className="owner-menu" aria-label="Owner navigation">
+        <nav className="owner-menu" id="owner-navigation" aria-label="Owner navigation">
           <NavLink to="/owner/dashboard" onClick={closeMobileMenu}>
             <i className="bi bi-grid-1x2"></i> Dashboard
           </NavLink>
@@ -39,6 +39,9 @@ function OwnerLayout() {
           </NavLink>
           <NavLink to="/owner/interested-users" onClick={closeMobileMenu}>
             <i className="bi bi-people"></i> Interested Users
+          </NavLink>
+          <NavLink to="/owner/tenancies" onClick={closeMobileMenu}>
+            <i className="bi bi-file-earmark-text"></i> Tenancies
           </NavLink>
           <NavLink to="/owner/notifications" onClick={closeMobileMenu}>
             <i className="bi bi-bell"></i> Notifications
@@ -65,6 +68,8 @@ function OwnerLayout() {
             type="button"
             className="owner-mobile-toggle"
             aria-label="Open owner menu"
+            aria-expanded={mobileMenu}
+            aria-controls="owner-navigation"
             onClick={() => setMobileMenu(true)}
           >
             <i className="bi bi-list"></i>
