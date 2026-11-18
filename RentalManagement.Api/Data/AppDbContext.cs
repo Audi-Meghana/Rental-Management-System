@@ -10,6 +10,11 @@ public class AppDbContext : DbContext
     {
     }
 
+    protected AppDbContext(DbContextOptions options)
+        : base(options)
+    {
+    }
+
     public DbSet<Property> Properties { get; set; }
 
     public DbSet<User> Users { get; set; }
