@@ -1,0 +1,8 @@
+# Toolchain prerequisites for this non-Python project:
+# Node.js ^20.19.0 or >=22.12.0 (npm is included with Node.js)
+# .NET 10 SDK
+# Microsoft SQL Server instance
+# .NET EF Core CLI 10.0.12 (for database migrations)
+#
+# JavaScript dependencies: rental-management-ui/package.json
+# .NET dependencies: RentalManagement.Api/RentalManagement.Api.csproj
