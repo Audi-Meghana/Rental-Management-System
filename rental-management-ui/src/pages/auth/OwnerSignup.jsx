@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { saveSession } from "../../services/authService";
+import { API_BASE_URL } from "../../services/apiConfig";
 
-const API_URL = "http://localhost:5123/api/Auth";
+const API_URL = `${API_BASE_URL}/Auth`;
 
 function OwnerSignup({ onClose, onAuthenticated, onLogin }) {
   const [step, setStep] = useState(1);

@@ -1,4 +1,6 @@
-const API_URL = "http://localhost:5123/api/Auth";
+import { API_BASE_URL } from "./apiConfig";
+
+const API_URL = `${API_BASE_URL}/Auth`;
 
 export function saveSession(data) {
   localStorage.setItem("token", data.token);

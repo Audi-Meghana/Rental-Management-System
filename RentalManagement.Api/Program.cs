@@ -43,15 +43,28 @@ builder.Services.AddScoped<IVerificationService, VerificationService>();
 // CORS
 // =====================================================
 
+var configuredOrigins = builder.Configuration["Cors:AllowedOrigins"];
+var allowedOrigins = new[]
+    {
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174"
+    }
+    .Concat(string.IsNullOrWhiteSpace(configuredOrigins)
+        ? Array.Empty<string>()
+        : configuredOrigins.Split(
+            ',',
+            StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+    .Distinct(StringComparer.OrdinalIgnoreCase)
+    .ToArray();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("ReactApp", policy =>
     {
         policy
-            .WithOrigins(
-                "http://localhost:5173",
-                "http://localhost:5174"
-            )
+            .WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod();
     });

@@ -6,7 +6,7 @@ A rental-property platform with a React/Vite frontend and an ASP.NET Core Web AP
 
 - React 19 and Vite 8
 - ASP.NET Core and Entity Framework Core 10
-- Microsoft SQL Server
+- PostgreSQL for the current API runtime (SQL Server migrations are retained for legacy compatibility)
 
 ## Requirements
 
@@ -22,7 +22,7 @@ A rental-property platform with a React/Vite frontend and an ASP.NET Core Web AP
 
 ### 1. Configure the database
 
-Set `ConnectionStrings:DefaultConnection` in `RentalManagement.Api/appsettings.json` to a PostgreSQL connection string for your environment. The checked-in default still uses SQL Server and must be replaced before running the API with the PostgreSQL provider.
+Configure `ConnectionStrings:DefaultConnection` and the JWT settings (`Jwt:Key`, `Jwt:Issuer`, and `Jwt:Audience`) through .NET user-secrets or environment variables. Do not commit database credentials or JWT secrets.
 
 ### 2. Restore, migrate, and start the API
 
@@ -31,7 +31,7 @@ From the repository root:
 ```powershell
 dotnet restore .\RentalManagement.Api\RentalManagement.Api.csproj
 dotnet tool install --global dotnet-ef --version 10.0.12
-dotnet ef database update --project .\RentalManagement.Api\RentalManagement.Api.csproj --startup-project .\RentalManagement.Api\RentalManagement.Api.csproj
+dotnet ef database update --project .\RentalManagement.Api\RentalManagement.Api.csproj --startup-project .\RentalManagement.Api\RentalManagement.Api.csproj --context PostgresDbContext
 dotnet run --project .\RentalManagement.Api\RentalManagement.Api.csproj --launch-profile http
 ```
 
@@ -47,7 +47,7 @@ npm ci
 npm run dev
 ```
 
-Open the Vite URL printed in the terminal (normally `http://localhost:5173`). Keep the API and frontend running together.
+Set `VITE_API_URL=http://localhost:5123/api` in `rental-management-ui/.env.development` before starting Vite. Use `.env.development.example` as the local template; use `.env.production.example` as a reference for the deployed API URL. Real `.env.*` files are ignored by Git. Open the Vite URL printed in the terminal (normally `http://localhost:5173`) and keep both the API and frontend running. Restart Vite after changing environment values.
 
 ## Checks
 
@@ -63,15 +63,19 @@ dotnet build .\RentalManagement.Api\RentalManagement.Api.csproj
 
 ## Deployment notes
 
-The current app is configured for local development: frontend API calls use `http://localhost:5123`, and API CORS allows localhost origins only. The API runtime is being moved to PostgreSQL, but the checked-in EF Core migrations are still SQL Server-specific. The SQL Server EF provider remains in the project temporarily so those migration files continue to compile. **Do not run the existing migrations against PostgreSQL or deploy the database change until the migrations and schema/data migration path are converted.** The app also stores uploaded agreements and support attachments under the API's `App_Data` directory.
+The frontend reads its API base URL from `VITE_API_URL`. For a Render Static Site, set this at build time to `https://myhome-backend1.onrender.com/api` (or your API URL). The API allows localhost origins by default; configure `Cors__AllowedOrigins` on the API service to the exact frontend origin, such as `https://your-site.onrender.com` (comma-separated if there is more than one). Do not include an API path or trailing slash in the CORS origins.
+
+The API runtime uses PostgreSQL, but the original EF Core migrations are SQL Server-specific. The SQL Server EF provider remains temporarily so those migrations compile. **Do not apply the original SQL Server migrations to PostgreSQL.** The app also stores uploaded agreements and support attachments under the API's `App_Data` directory.
 
 Before deploying:
 
-1. Configure the frontend API base URL from a Vite environment variable and update every API/image URL to use it.
-2. Configure API CORS to allow the deployed frontend origin.
+1. Set `VITE_API_URL` in the frontend host's build environment.
+2. Set `Cors__AllowedOrigins` on the API service to the exact deployed frontend origin.
 3. Provide a reachable PostgreSQL connection string. Convert the existing SQL Server EF migrations and plan any required SQL Server data migration before applying database changes.
 4. Configure strong production JWT values using environment variables (`Jwt__Key`, `Jwt__Issuer`, and `Jwt__Audience`). Do not use the development JWT key from `appsettings.json`.
 5. Store uploaded files on persistent storage or an object-storage service; container-local files can be lost when an instance is replaced.
+
+ASP.NET Core does not load `.env` files by default. Keep database and JWT secrets in .NET user-secrets for local development and in the API host's environment settings for deployment; never commit them.
 
 Once configured, deploy the frontend as a Render **Static Site** with root directory `rental-management-ui`, build command `npm ci && npm run build`, and publish directory `dist`. Add a rewrite from `/*` to `/index.html` for React Router routes. Deploy the API as a Render **Web Service** using Docker, with root directory `RentalManagement.Api` and Dockerfile path `Dockerfile`. The API Dockerfile binds to Render's `PORT` (defaulting to `10000`). Swagger is enabled in Development; to temporarily expose `/swagger` on Render for testing, set `Swagger__Enabled` to `true` in the API service's environment, then remove or set it to `false` afterward. See Render's [Static Sites](https://render.com/docs/static-sites) and [Docker](https://render.com/docs/docker) guides.
 

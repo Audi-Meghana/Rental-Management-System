@@ -1,11 +1,15 @@
-const API_URL = "http://localhost:5123/api/Properties";
-const INTERACTION_URL = "http://localhost:5123/api/interactions";
-const TENANCY_URL = "http://localhost:5123/api/tenancies";
-const ADMIN_URL = "http://localhost:5123/api/admin";
-const NEWS_URL = "http://localhost:5123/api/news";
-const ADMIN_NEWS_URL = "http://localhost:5123/api/admin/news";
-const SUPPORT_URL = "http://localhost:5123/api/support/tickets";
-const ADMIN_TICKETS_URL = "http://localhost:5123/api/admin/tickets";
+import { API_BASE_URL, API_ORIGIN } from "./apiConfig";
+
+const API_URL = `${API_BASE_URL}/Properties`;
+
+const INTERACTION_URL = `${API_BASE_URL}/interactions`;
+const TENANCY_URL = `${API_BASE_URL}/tenancies`;
+const ADMIN_URL = `${API_BASE_URL}/admin`;
+const NEWS_URL = `${API_BASE_URL}/news`;
+const ADMIN_NEWS_URL = `${API_BASE_URL}/admin/news`;
+const SUPPORT_URL = `${API_BASE_URL}/support/tickets`;
+const ADMIN_TICKETS_URL = `${API_BASE_URL}/admin/tickets`;
+
 
 async function request(url, options = {}) {
   const token = localStorage.getItem("token");
@@ -28,7 +32,7 @@ function tenancyRequest(path, options) { return request(`${TENANCY_URL}${path}`,
 
 export function getImageUrl(imageUrl) {
   if (!imageUrl) return "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=80";
-  return imageUrl.startsWith("http") ? imageUrl : `http://localhost:5123${imageUrl}`;
+  return new URL(imageUrl, API_ORIGIN).toString();
 }
 
 export function getPropertyImages(property) {
@@ -179,7 +183,7 @@ export async function downloadSupportTicketAttachment(ticketId, fileName) {
 
 async function reviewRequest(path, options) {
   const token = localStorage.getItem("token");
-  const response = await fetch(`http://localhost:5123/api/reviews${path}`, {
+  const response = await fetch(`${API_BASE_URL}/reviews${path}`, {
     ...options,
     headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) }
   });
