@@ -64,11 +64,15 @@
   .admin-reports-header > div { order: 3; width: 100%; }
   .admin-reports-content { padding: 28px 18px 50px; }
   .admin-report-card { padding: 16px; }
+  .admin-report-meta { font-size: 11px; overflow-wrap: anywhere; }
+  .admin-report-filters button { min-height: 40px; font-size: 11px; }
   .tenancy-proposal-form { grid-template-columns: 1fr 1fr; }
   .tenancy-upload-form { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 440px) {
   .tenancy-proposal-form { grid-template-columns: 1fr; }
-  .admin-report-card .owner-enquiry-actions > * { flex-basis: 100%; }
+  .admin-report-card > header { flex-wrap: wrap; gap: 8px; }
+  .admin-report-card h2 { overflow-wrap: anywhere; }
+  .admin-report-card .owner-enquiry-actions > * { min-height: 42px; flex-basis: 100%; }
 }
