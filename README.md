@@ -12,7 +12,7 @@ A rental-property platform with a React/Vite frontend and an ASP.NET Core Web AP
 
 - Node.js `^20.19.0` or `>=22.12.0` and npm
 - .NET 10 SDK
-- A running SQL Server instance
+- A PostgreSQL instance for the API runtime
 - Git
 - .NET EF Core CLI 10.0.12 to apply database migrations
 
@@ -22,7 +22,7 @@ A rental-property platform with a React/Vite frontend and an ASP.NET Core Web AP
 
 ### 1. Configure the database
 
-Start SQL Server and set `ConnectionStrings:DefaultConnection` in `RentalManagement.Api/appsettings.json` to a connection string that works on your machine. The checked-in default uses Windows integrated authentication and expects a local SQL Server instance.
+Set `ConnectionStrings:DefaultConnection` in `RentalManagement.Api/appsettings.json` to a PostgreSQL connection string for your environment. The checked-in default still uses SQL Server and must be replaced before running the API with the PostgreSQL provider.
 
 ### 2. Restore, migrate, and start the API
 
@@ -63,13 +63,13 @@ dotnet build .\RentalManagement.Api\RentalManagement.Api.csproj
 
 ## Deployment notes
 
-The current app is configured for local development: frontend API calls use `http://localhost:5123`, and API CORS allows localhost origins only. It also uses SQL Server and stores uploaded agreements and support attachments under the API's `App_Data` directory. **It is not ready to deploy to Render without production configuration.**
+The current app is configured for local development: frontend API calls use `http://localhost:5123`, and API CORS allows localhost origins only. The API runtime is being moved to PostgreSQL, but the checked-in EF Core migrations are still SQL Server-specific. The SQL Server EF provider remains in the project temporarily so those migration files continue to compile. **Do not run the existing migrations against PostgreSQL or deploy the database change until the migrations and schema/data migration path are converted.** The app also stores uploaded agreements and support attachments under the API's `App_Data` directory.
 
 Before deploying:
 
 1. Configure the frontend API base URL from a Vite environment variable and update every API/image URL to use it.
 2. Configure API CORS to allow the deployed frontend origin.
-3. Provide a reachable SQL Server connection string. Render PostgreSQL is not a drop-in replacement for this SQL Server/EF Core setup; migrating providers requires code and database changes.
+3. Provide a reachable PostgreSQL connection string. Convert the existing SQL Server EF migrations and plan any required SQL Server data migration before applying database changes.
 4. Configure strong production JWT values using environment variables (`Jwt__Key`, `Jwt__Issuer`, and `Jwt__Audience`). Do not use the development JWT key from `appsettings.json`.
 5. Store uploaded files on persistent storage or an object-storage service; container-local files can be lost when an instance is replaced.
 
