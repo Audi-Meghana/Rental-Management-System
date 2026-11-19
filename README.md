@@ -73,7 +73,7 @@ dotnet build .\RentalManagement.Api\RentalManagement.Api.csproj
 
 ## Deployment notes
 
-The frontend reads its API base URL from `VITE_API_URL`. For a Render Static Site, set this at build time to `https://myhome-backend-icrx.onrender.com/api` (or your API URL). The API allows localhost origins and `https://myhome-d67z.onrender.com` by default; configure `Cors__AllowedOrigins` on the API service to the exact frontend origin if it differs (comma-separated if there is more than one). Do not include an API path or trailing slash in the CORS origins.
+The frontend reads its API base URL from `VITE_API_URL`. For a Render Static Site, set this at build time to `https://myhome-backend-icrx.onrender.com/api` (or your API URL). The API allows localhost origins, `https://myhome-d67z.onrender.com`, and `https://myhome-rental-management-system.onrender.com` by default; configure `Cors__AllowedOrigins` on the API service to the exact frontend origin if it differs (comma-separated if there is more than one). Do not include an API path or trailing slash in the CORS origins.
 
 The API runtime uses PostgreSQL, but the original EF Core migrations are SQL Server-specific. The SQL Server EF provider remains temporarily so those migrations compile. **Do not apply the original SQL Server migrations to PostgreSQL.** The app also stores uploaded agreements and support attachments under the API's `App_Data` directory.
 
