@@ -117,7 +117,7 @@ function Home() {
                   </div>
                 </Link>
               ))}
-            </div> : <div className="rh-empty-state"><i className="bi bi-house"></i><h3>No available properties yet</h3><p>New listings will appear here when an owner publishes them.</p></div>}
+            </div> : !error && <div className="rh-empty-state"><i className="bi bi-house"></i><h3>No available properties yet</h3><p>New listings will appear here when an owner publishes them.</p></div>}
         </section>
 
         <section className="rh-stat-banner" aria-label="Current listing totals">

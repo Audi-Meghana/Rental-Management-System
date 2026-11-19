@@ -2974,6 +2974,7 @@ a {
 
   max-height: 92vh;
   overflow-y: auto;
+  scrollbar-width: none;
 
   background: #ffffff;
 
@@ -2985,6 +2986,10 @@ a {
     0 30px 80px rgba(0, 0, 0, 0.30);
 
   animation: loginCardIn 0.3s ease;
+}
+
+.login-card::-webkit-scrollbar {
+  display: none;
 }
 
 

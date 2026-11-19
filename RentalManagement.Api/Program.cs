@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 using RentalManagement.Api.Data;
 using RentalManagement.Api.Services;
 using System.Text;
@@ -18,15 +19,49 @@ builder.Services.AddControllers();
 // DATABASE
 // =====================================================
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var databaseUrl = builder.Configuration["DATABASE_URL"];
+
+if (string.IsNullOrWhiteSpace(connectionString) &&
+    !string.IsNullOrWhiteSpace(databaseUrl))
+{
+    if (!Uri.TryCreate(databaseUrl, UriKind.Absolute, out var databaseUri) ||
+        (databaseUri.Scheme != "postgres" && databaseUri.Scheme != "postgresql"))
+    {
+        throw new InvalidOperationException(
+            "DATABASE_URL must be a valid PostgreSQL connection URL.");
+    }
+
+    var credentialSeparator = databaseUri.UserInfo.IndexOf(':');
+    if (credentialSeparator <= 0 ||
+        credentialSeparator == databaseUri.UserInfo.Length - 1)
+    {
+        throw new InvalidOperationException(
+            "DATABASE_URL must include a PostgreSQL username and password.");
+    }
+
+    connectionString = new NpgsqlConnectionStringBuilder
+    {
+        Host = databaseUri.Host,
+        Port = databaseUri.IsDefaultPort ? 5432 : databaseUri.Port,
+        Database = Uri.UnescapeDataString(databaseUri.AbsolutePath.TrimStart('/')),
+        Username = Uri.UnescapeDataString(databaseUri.UserInfo[..credentialSeparator]),
+        Password = Uri.UnescapeDataString(databaseUri.UserInfo[(credentialSeparator + 1)..]),
+        SslMode = SslMode.Require
+    }.ConnectionString;
+}
+
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException(
+        "Database connection is missing. Configure ConnectionStrings:DefaultConnection or a Supabase PostgreSQL DATABASE_URL.");
+}
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-    ));
+    options.UseNpgsql(connectionString));
 
 builder.Services.AddDbContext<PostgresDbContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-    ));
+    options.UseNpgsql(connectionString));
 
 // =====================================================
 // SERVICES
@@ -50,13 +85,14 @@ var allowedOrigins = new[]
         "http://localhost:5174",
         "http://127.0.0.1:5173",
         "http://127.0.0.1:5174",
-        "https://myhome-d67z.onrender.com/"
+        "https://myhome-d67z.onrender.com"
     }
     .Concat(string.IsNullOrWhiteSpace(configuredOrigins)
         ? Array.Empty<string>()
         : configuredOrigins.Split(
             ',',
             StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+    .Select(origin => origin.TrimEnd('/'))
     .Distinct(StringComparer.OrdinalIgnoreCase)
     .ToArray();
 

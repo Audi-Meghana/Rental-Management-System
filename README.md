@@ -22,7 +22,17 @@ A rental-property platform with a React/Vite frontend and an ASP.NET Core Web AP
 
 ### 1. Configure the database
 
-Configure `ConnectionStrings:DefaultConnection` and the JWT settings (`Jwt:Key`, `Jwt:Issuer`, and `Jwt:Audience`) through .NET user-secrets or environment variables. Do not commit database credentials or JWT secrets.
+Configure either `ConnectionStrings:DefaultConnection` (a .NET/Npgsql connection string) or `DATABASE_URL` (a PostgreSQL URL copied from Supabase), plus `Jwt:Key`, through .NET user-secrets or environment variables. The non-secret JWT issuer and audience have local defaults; set the production values in Render. Do not commit database credentials or JWT secrets.
+
+For a first-time local setup, run these commands from the repository root. Set **one** of the database settings using the connection details from Supabase, and use your own random JWT signing key of at least 32 bytes:
+
+```powershell
+dotnet user-secrets init --project .\RentalManagement.Api\RentalManagement.Api.csproj
+dotnet user-secrets set "DATABASE_URL" "<Supabase PostgreSQL URL>" --project .\RentalManagement.Api\RentalManagement.Api.csproj
+dotnet user-secrets set "Jwt:Key" "<your random local JWT signing key>" --project .\RentalManagement.Api\RentalManagement.Api.csproj
+```
+
+Alternatively, store the connection details as `ConnectionStrings:DefaultConnection` in Npgsql format (`Host=...;Port=5432;Database=postgres;Username=...;Password=...;SSL Mode=Require`). Do not configure both database settings; `ConnectionStrings:DefaultConnection` takes precedence.
 
 ### 2. Restore, migrate, and start the API
 
@@ -63,16 +73,16 @@ dotnet build .\RentalManagement.Api\RentalManagement.Api.csproj
 
 ## Deployment notes
 
-The frontend reads its API base URL from `VITE_API_URL`. For a Render Static Site, set this at build time to `https://myhome-backend1.onrender.com/api` (or your API URL). The API allows localhost origins by default; configure `Cors__AllowedOrigins` on the API service to the exact frontend origin, such as `https://your-site.onrender.com` (comma-separated if there is more than one). Do not include an API path or trailing slash in the CORS origins.
+The frontend reads its API base URL from `VITE_API_URL`. For a Render Static Site, set this at build time to `https://myhome-backend1.onrender.com/api` (or your API URL). The API allows localhost origins and `https://myhome-d67z.onrender.com` by default; configure `Cors__AllowedOrigins` on the API service to the exact frontend origin if it differs (comma-separated if there is more than one). Do not include an API path or trailing slash in the CORS origins.
 
 The API runtime uses PostgreSQL, but the original EF Core migrations are SQL Server-specific. The SQL Server EF provider remains temporarily so those migrations compile. **Do not apply the original SQL Server migrations to PostgreSQL.** The app also stores uploaded agreements and support attachments under the API's `App_Data` directory.
 
 Before deploying:
 
-1. Set `VITE_API_URL` in the frontend host's build environment.
+1. Set `VITE_API_URL` in the frontend host's build environment, then redeploy the static site after changing it.
 2. Set `Cors__AllowedOrigins` on the API service to the exact deployed frontend origin.
-3. Provide a reachable PostgreSQL connection string. Convert the existing SQL Server EF migrations and plan any required SQL Server data migration before applying database changes.
-4. Configure strong production JWT values using environment variables (`Jwt__Key`, `Jwt__Issuer`, and `Jwt__Audience`). Do not use the development JWT key from `appsettings.json`.
+3. Set either `ConnectionStrings__DefaultConnection` to an Npgsql connection string or `DATABASE_URL` to the Supabase PostgreSQL URL. Convert the existing SQL Server EF migrations and plan any required SQL Server data migration before applying database changes.
+4. Configure strong production JWT values using environment variables (`Jwt__Key`, `Jwt__Issuer`, and `Jwt__Audience`).
 5. Store uploaded files on persistent storage or an object-storage service; container-local files can be lost when an instance is replaced.
 
 ASP.NET Core does not load `.env` files by default. Keep database and JWT secrets in .NET user-secrets for local development and in the API host's environment settings for deployment; never commit them.

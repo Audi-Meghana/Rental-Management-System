@@ -13,16 +13,30 @@ const ADMIN_TICKETS_URL = `${API_BASE_URL}/admin/tickets`;
 
 async function request(url, options = {}) {
   const token = localStorage.getItem("token");
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      ...(options.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options.headers || {})
+  let response;
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers: {
+        ...(options.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(options.headers || {})
+      }
+    });
+  } catch (error) {
+    if (error instanceof TypeError) {
+      throw new Error(
+        `Unable to reach the API at ${API_BASE_URL}. Check that the backend is running and allows this site in CORS.`,
+        { cause: error }
+      );
     }
-  });
+    throw error;
+  }
+
   const data = await response.json().catch(() => null);
-  if (!response.ok) throw new Error(data?.message || data || "Something went wrong.");
+  if (!response.ok) {
+    throw new Error(data?.message || data || `API request failed with status ${response.status}.`);
+  }
   return data;
 }
 
