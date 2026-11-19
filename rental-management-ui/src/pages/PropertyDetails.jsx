@@ -108,7 +108,7 @@ function PropertyDetails() {
       phoneNumber: current.phoneNumber || user?.phoneNumber || "",
       email: current.email || user?.email || ""
     }));
-    if (!user || user.role !== "User" || !id) return;
+    if (!property || !user || user.role !== "User" || !id) return;
 
     getFavorites()
       .then((items) => setFavorite(items.some((item) => String(item.property.id) === String(id))))
@@ -125,7 +125,7 @@ function PropertyDetails() {
       .then((items) => setRecentlyViewed(items.filter((item) => String(item.property.id) !== String(id)).slice(0, 3)))
       .catch((viewError) => setError(viewError.message));
     getChat(id).then(setMessages).catch((chatError) => setError(chatError.message));
-  }, [id, user]);
+  }, [id, user, property]);
 
   useEffect(() => {
     if (!lightboxOpen) return undefined;
@@ -360,7 +360,13 @@ function PropertyDetails() {
             <section className={`detail-gallery-grid image-count-${Math.min(images.length, 5)}`} aria-label="Property photo gallery">
               {images.slice(0, 5).map((image, index) => (
                 <button type="button" className={`detail-gallery-image detail-gallery-image-${index + 1}`} key={`${image}-${index}`} onClick={() => { setActiveImage(index); setLightboxOpen(true); }} aria-label={`View property photo ${index + 1}`}>
-                  <img src={image} alt={`${property.title} view ${index + 1}`} />
+                  <img
+                    src={image}
+                    alt={`${property.title} view ${index + 1}`}
+                    loading={index === 0 ? "eager" : "lazy"}
+                    fetchPriority={index === 0 ? "high" : "auto"}
+                    decoding="async"
+                  />
                   {index === 0 && <span><i className="bi bi-images"></i>{images.length > 1 ? `1 / ${images.length}` : "View photo"}</span>}
                 </button>
               ))}

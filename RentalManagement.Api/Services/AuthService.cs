@@ -73,6 +73,7 @@ public class AuthService : IAuthService
         LoginDto dto)
     {
         var user = await _context.Users
+            .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Email == dto.Email);
 
         if (user == null)

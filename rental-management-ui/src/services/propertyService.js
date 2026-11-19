@@ -10,15 +10,39 @@ const ADMIN_NEWS_URL = `${API_BASE_URL}/admin/news`;
 const SUPPORT_URL = `${API_BASE_URL}/support/tickets`;
 const ADMIN_TICKETS_URL = `${API_BASE_URL}/admin/tickets`;
 
+const pendingGetRequests = new Map();
 
-async function request(url, options = {}) {
+async function request(url, options = {}, includeToken = true) {
   const token = localStorage.getItem("token");
+  const method = (options.method || "GET").toUpperCase();
+  const requestKey = method === "GET"
+    ? `${url}|${includeToken ? token || "" : ""}`
+    : null;
+  const pendingRequest = requestKey ? pendingGetRequests.get(requestKey) : null;
+
+  if (pendingRequest) return pendingRequest;
+
+  const requestPromise = performRequest(url, options, includeToken ? token : null);
+  if (requestKey) pendingGetRequests.set(requestKey, requestPromise);
+
+  try {
+    return await requestPromise;
+  } finally {
+    if (requestKey && pendingGetRequests.get(requestKey) === requestPromise) {
+      pendingGetRequests.delete(requestKey);
+    }
+  }
+}
+
+async function performRequest(url, options, token) {
   let response;
   try {
     response = await fetch(url, {
       ...options,
       headers: {
-        ...(options.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+        ...(options.body != null && !(options.body instanceof FormData)
+          ? { "Content-Type": "application/json" }
+          : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(options.headers || {})
       }
@@ -40,7 +64,7 @@ async function request(url, options = {}) {
   return data;
 }
 
-function propertyRequest(path = "", options) { return request(`${API_URL}${path}`, options); }
+function propertyRequest(path = "", options, includeToken = true) { return request(`${API_URL}${path}`, options, includeToken); }
 function interactionRequest(path, options) { return request(`${INTERACTION_URL}${path}`, options); }
 function tenancyRequest(path, options) { return request(`${TENANCY_URL}${path}`, options); }
 
@@ -62,10 +86,10 @@ export function getProperties(filters = {}) {
   Object.entries(filters).forEach(([key, value]) => {
     if (value !== "" && value !== undefined && value !== null) query.set(key, value);
   });
-  return propertyRequest(query.toString() ? `?${query}` : "");
+  return propertyRequest(query.toString() ? `?${query}` : "", undefined, false);
 }
 export function getOwnerProperties() { return propertyRequest("/owner"); }
-export function getProperty(id) { return propertyRequest(`/${id}`); }
+export function getProperty(id) { return propertyRequest(`/${id}`, undefined, false); }
 export function createProperty(property) { return propertyRequest("", { method: "POST", body: JSON.stringify(property) }); }
 export function updateProperty(id, property) { return propertyRequest(`/${id}`, { method: "PUT", body: JSON.stringify(property) }); }
 export function deleteProperty(id) { return propertyRequest(`/${id}`, { method: "DELETE" }); }
@@ -195,17 +219,8 @@ export async function downloadSupportTicketAttachment(ticketId, fileName) {
   URL.revokeObjectURL(blobUrl);
 }
 
-async function reviewRequest(path, options) {
-  const token = localStorage.getItem("token");
-  const response = await fetch(`${API_BASE_URL}/reviews${path}`, {
-    ...options,
-    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) }
-  });
-  const data = await response.json().catch(() => null);
-  if (!response.ok) throw new Error(data?.message || "Unable to load reviews.");
-  return data;
-}
+function reviewRequest(path, options, includeToken = true) { return request(`${API_BASE_URL}/reviews${path}`, options, includeToken); }
 
-export function getPropertyReviews(propertyId) { return reviewRequest(`/property/${propertyId}`); }
+export function getPropertyReviews(propertyId) { return reviewRequest(`/property/${propertyId}`, undefined, false); }
 export function addPropertyReview(propertyId, review) { return reviewRequest(`/property/${propertyId}`, { method: "POST", body: JSON.stringify(review) }); }
-export function getRecommendedProperties() { return reviewRequest("/recommended"); }
+export function getRecommendedProperties() { return reviewRequest("/recommended", undefined, false); }

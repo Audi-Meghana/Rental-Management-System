@@ -24,6 +24,7 @@ public class PropertyService : IPropertyService
         string? propertyType)
     {
         var query = _context.Properties
+            .AsNoTracking()
             .Where(property => property.IsPublished)
             .AsQueryable();
 

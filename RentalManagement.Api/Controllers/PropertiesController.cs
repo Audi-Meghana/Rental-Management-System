@@ -53,14 +53,34 @@ public class PropertiesController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetProperty(int id)
     {
-        var property = await _context.Properties
-            .FirstOrDefaultAsync(item => item.Id == id);
+        var result = await (
+            from item in _context.Properties.AsNoTracking()
+            join owner in _context.Users.AsNoTracking()
+                on item.OwnerId equals (int?)owner.Id into owners
+            from owner in owners.DefaultIfEmpty()
+            where item.Id == id
+            select new
+            {
+                Property = item,
+                Owner = owner == null
+                    ? null
+                    : new
+                    {
+                        owner.Id,
+                        owner.FullName,
+                        owner.Email,
+                        owner.PhoneNumber,
+                        owner.Location
+                    }
+            }
+        ).FirstOrDefaultAsync();
 
-        if (property == null)
+        if (result == null)
         {
             return NotFound("Property not found.");
         }
 
+        var property = result.Property;
         if (!property.IsPublished &&
             !User.IsInRole("Admin") &&
             !(int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var viewerId) &&
@@ -68,10 +88,6 @@ public class PropertiesController : ControllerBase
         {
             return NotFound("Property not found.");
         }
-
-        var owner = property.OwnerId.HasValue
-            ? await _context.Users.FindAsync(property.OwnerId.Value)
-            : null;
 
         return Ok(new
         {
@@ -122,14 +138,7 @@ public class PropertiesController : ControllerBase
             property.LeaseDurationMonths,
             property.NoticePeriodMonths,
             property.AvailableFrom,
-            Owner = owner == null ? null : new
-            {
-                owner.Id,
-                owner.FullName,
-                owner.Email,
-                owner.PhoneNumber,
-                owner.Location
-            }
+            result.Owner
         });
     }
 

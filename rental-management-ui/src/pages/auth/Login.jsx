@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../services/authService";
 
 function Login({
@@ -7,6 +8,7 @@ function Login({
   onRegister,
   onAuthenticated
 }) {
+  const navigate = useNavigate();
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
 
@@ -41,13 +43,12 @@ function Login({
       if (onAuthenticated) {
         onAuthenticated(data.user);
       } else {
-        if (data.user.role === "Admin") {
-          window.location.href = "/admin";
-        } else if (data.user.role === "Owner") {
-          window.location.href = "/owner/dashboard";
-        } else {
-          window.location.href = "/user/dashboard";
-        }
+        const destination = data.user.role === "Admin"
+          ? "/admin"
+          : data.user.role === "Owner"
+            ? "/owner/dashboard"
+            : "/user/dashboard";
+        navigate(destination);
       }
 
     } catch (error) {
